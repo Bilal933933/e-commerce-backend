@@ -8,6 +8,7 @@ import authRoutes from './routes/auth.routes.js';
 import userRoutes from './routes/user.routes.js';
 import notFound from './routes/notFound.routes.js';
 import homeRoutes from './routes/home.routes.js';
+import adminRoutes from './routes/admin/index.js';
 
 // Middleware & Utils
 import globalErrorHandler from './middleware/errorHandler.js';
@@ -43,6 +44,7 @@ if (process.env.NODE_ENV === 'development') {
 app.use('/', homeRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/admin', adminRoutes);
 app.use(notFound);
 
 

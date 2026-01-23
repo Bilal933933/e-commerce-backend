@@ -1,7 +1,7 @@
 import express from 'express';
-import restrictTo from '../middleware/restrictTo.js';
-import authMiddleware from '../middleware/verifyToken.js';
-import { getAllUsers, deleteUser } from '../controllers/users.controller.js';
+import restrictTo from '../../middleware/restrictTo.js';
+import authMiddleware from '../../middleware/verifyToken.js';
+import { getAllUsers, deleteUser } from '../../controllers/users.controller.js';
 
 const router = express.Router();
 
