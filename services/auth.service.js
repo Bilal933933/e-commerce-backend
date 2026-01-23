@@ -3,22 +3,12 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import AppError from '../utils/AppError.js';
 import Logger from '../utils/logger.js';
+import Validation from '../validators/auth.validator.js';
 
 class AuthService {
     static async register({ name, email, password }) {
         // Validation
-        if (!name || !email || !password) {
-            throw new AppError('جميع الحقول مطلوبة', 400);
-        }
-
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(email)) {
-            throw new AppError('البريد الإلكتروني غير صالح', 400);
-        }
-
-        if (password.length < 6) {
-            throw new AppError('كلمة المرور يجب أن تكون 6 أحرف على الأقل', 400);
-        }
+        Validation.validateRegister({ name, email, password });
 
         // Business rule: unique email
         const existingUser = await User.findOne({ email });
@@ -55,9 +45,7 @@ class AuthService {
 
     static async login({ email, password }) {
         // Validation
-        if (!email || !password) {
-            throw new AppError('جميع الحقول مطلوبة', 400);
-        }
+        Validation.validateLogin({ email, password });
 
         const user = await User.findOne({ email }).select('+password');
         if (!user) {
@@ -84,7 +72,7 @@ class AuthService {
             token,
         };
     }
-    
+
 }
 
 export default AuthService;

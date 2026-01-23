@@ -4,10 +4,10 @@ import Database from './config/db.js';
 import ConfigApp from './config/configapp.js';
 
 // Routes
-import authRoutes from './routes/authRoutes.js';
-import userRoutes from './routes/userRoutes.js';
-import notFound from './routes/notFound.js';
-import homeRoutes from './routes/homeRoutes.js';
+import authRoutes from './routes/auth.routes.js';
+import userRoutes from './routes/user.routes.js';
+import notFound from './routes/notFound.routes.js';
+import homeRoutes from './routes/home.routes.js';
 
 // Middleware & Utils
 import globalErrorHandler from './middleware/errorHandler.js';
