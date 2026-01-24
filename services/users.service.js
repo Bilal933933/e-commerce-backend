@@ -1,9 +1,9 @@
 import User from '../models/User.js';
 import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
 import AppError from '../utils/AppError.js';
 import Logger from '../utils/logger.js';
 import Validation from '../validators/auth.validator.js';
+import validateId from '../validators/validateId.js';
 
 class UsersService {
     // طرق خدمة المستخدمين ستذهب هنا
@@ -18,7 +18,8 @@ class UsersService {
         return users;
     }
 
-    static async getUserById(userId) {
+    static async getUserProfile(userId) {
+        validateId(userId);
         const user = await User.findById(userId).select('-password');
         if (!user) {
             Logger.error('لا يوجد مستخدم بهذا الرقم');
@@ -28,7 +29,8 @@ class UsersService {
         return user;
     }
 
-    static async updateUser(userId, userData) {
+    static async updateUserProfile(userId, userData) {
+        validateId(userId);
         Validation.validateUpdate(userData);
         const user = await User.findByIdAndUpdate(userId, userData, { new: true });
         if (!user) {
@@ -54,6 +56,7 @@ class UsersService {
         return user;
     }
     static async deleteUser(userId) {
+        validateId(userId);
         const user = await User.findByIdAndDelete(userId);
         if (!user) {
             Logger.error('لا يوجد مستخدم بهذا الرقم');

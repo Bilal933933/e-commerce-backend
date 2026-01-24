@@ -6,7 +6,7 @@ import { getAllUsers, deleteUser } from '../../controllers/users.controller.js';
 const router = express.Router();
 
 // مسارات المدير
-router.get('/getAllUsers', authMiddleware, restrictTo('admin'), getAllUsers);
+router.get('/users', authMiddleware, restrictTo('admin'), getAllUsers);
 router.delete('/:id', authMiddleware, restrictTo('admin'), deleteUser);
 
 export default router;
