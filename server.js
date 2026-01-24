@@ -10,6 +10,7 @@ import notFound from './routes/notFound.routes.js';
 import homeRoutes from './routes/home.routes.js';
 import adminRoutes from './routes/admin/index.js';
 import CategoryRoutes from './routes/categories.route.js';
+import ProductRoutes from './routes/products.routes.js';
 
 // Middleware & Utils
 import globalErrorHandler from './middleware/errorHandler.js';
@@ -47,6 +48,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/categories', CategoryRoutes);
+app.use('/api/products', ProductRoutes);
 
 // مسار غير موجود
 app.use(notFound);
