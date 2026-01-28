@@ -18,7 +18,3 @@ const restrictOrderStatus = (req, res, next) => {
 };
 
 export default restrictOrderStatus;
-
-
-// git add middleware/restrictOrderStatus.js
-// git commit -m "feat: restrict order modification based on status"
