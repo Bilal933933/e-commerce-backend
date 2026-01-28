@@ -21,7 +21,7 @@ const validateOrderStatusTransition = (req, res, next) => {
   if (!allowedNextStatuses.includes(nextStatus)) {
     return next(
       new AppError(
-        `Cannot change order status from '${currentStatus}' to '${nextStatus}'`,
+        `انقل الحالة من'${currentStatus}' الي '${nextStatus}'`,
         400
       )
     );
