@@ -1,6 +1,7 @@
 import ProductsService from "../services/products.service.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 
+
 const createProduct = asyncHandler(async (req, res) => {
     const { name, price, description, categoryId, image } = req.body;
     const product = await ProductsService.createProduct({
@@ -26,10 +27,9 @@ const updateProduct = asyncHandler(async (req, res) => {
 })
 
 const getAllProducts = asyncHandler(async (req, res) => {
-    const products = await ProductsService.getAllProducts();
+    const products = await ProductsService.getAllProducts(req.query);
     res.status(200).json({ status: "success", data: products, message: "تم جلب جميع المنتجات بنجاح" });
-}
-);
+});
 
 const getProduct = asyncHandler(async (req, res) => {
     const { id } = req.params;
