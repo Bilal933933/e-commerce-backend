@@ -15,7 +15,7 @@ const createProduct = asyncHandler(async (req, res) => {
 
 const updateProduct = asyncHandler(async (req, res) => {
     const { id } = req.params;
-    const { name, price, description, category } = req.body;
+    const { name, price, description, categoryId, image } = req.body;
     const product = await ProductsService.updateProduct( {
         name,
         price,

@@ -76,7 +76,7 @@ const orderSchema = new mongoose.Schema(
 
     cancelledBy: {
       type: String,
-      enum: ["USER", "ADMIN"],
+      enum: ["user", "admin"],
       default: null,
     },
   },

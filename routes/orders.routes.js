@@ -9,7 +9,7 @@ import {
   updateOrderStatus,
 } from "../controllers/orders.controller.js";
 
-import protect from "../middleware/protect.js";
+import authMiddleware from '../middleware/verifyToken.js';
 import restrictTo from "../middleware/restrictTo.js";
 
 import checkOrderOwnership from "../middleware/checkOrderOwnership.js";
@@ -23,23 +23,23 @@ const router = express.Router();
 ======================= */
 
 // Create order
-router.post("/", protect, createOrder);
+router.post("/", authMiddleware, createOrder);
 
 // Get my orders
-router.get("/my", protect, getMyOrders);
+router.get("/my", authMiddleware, getMyOrders);
 
 // Get single order (User / Admin)
 router.get(
   "/:id",
-  protect,
+  authMiddleware,
   checkOrderOwnership,
   getOrderById
 );
 
 // Cancel order
 router.patch(
-  "/:id/cancel",
-  protect,
+  "/cancel/:id",
+  authMiddleware,
   checkOrderOwnership,
   restrictOrderStatus,
   cancelOrder
@@ -52,16 +52,17 @@ router.patch(
 // Get all orders
 router.get(
   "/",
-  protect,
-  restrictTo("ADMIN"),
+  authMiddleware,
+  restrictTo("admin"),
   getAllOrders
 );
 
 // Update order status
 router.patch(
-  "/:id/status",
-  protect,
-  restrictTo("ADMIN"),
+  "/status/:id",
+  authMiddleware,
+  restrictTo("admin"),
+  checkOrderOwnership,
   validateOrderStatusTransition,
   updateOrderStatus
 );

@@ -11,10 +11,10 @@ import homeRoutes from './routes/home.routes.js';
 import adminRoutes from './routes/admin/index.js';
 import CategoryRoutes from './routes/categories.route.js';
 import ProductRoutes from './routes/products.routes.js';
+import OrderRoutes from './routes/orders.routes.js';
 
 // Middleware & Utils
 import globalErrorHandler from './middleware/errorHandler.js';
-import AppError from './utils/AppError.js';
 
 // تحميل المتغيرات البيئية
 dotenv.config();
@@ -49,6 +49,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/categories', CategoryRoutes);
 app.use('/api/products', ProductRoutes);
+app.use('/api/orders', OrderRoutes);
 
 // مسار غير موجود
 app.use(notFound);

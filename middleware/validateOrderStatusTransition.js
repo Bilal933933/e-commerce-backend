@@ -9,11 +9,17 @@ const ALLOWED_TRANSITIONS = {
 };
 
 const validateOrderStatusTransition = (req, res, next) => {
-  const currentStatus = req.order.status;
+  // ✅ تحقق من وجود الطلب أولاً
+  const order = req.order;
+  if (!order) {
+    return next(new AppError("الطلب غير موجود", 404));
+  }
+
+  const currentStatus = order.status;
   const nextStatus = req.body.status;
 
   if (!nextStatus) {
-    return next(new AppError("New status is required", 400));
+    return next(new AppError("يجب تحديد الحالة الجديدة", 400));
   }
 
   const allowedNextStatuses = ALLOWED_TRANSITIONS[currentStatus] || [];
@@ -21,7 +27,7 @@ const validateOrderStatusTransition = (req, res, next) => {
   if (!allowedNextStatuses.includes(nextStatus)) {
     return next(
       new AppError(
-        `انقل الحالة من'${currentStatus}' الي '${nextStatus}'`,
+        `لا يمكن نقل الحالة من '${currentStatus}' إلى '${nextStatus}'`,
         400
       )
     );

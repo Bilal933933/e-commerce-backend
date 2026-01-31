@@ -1,9 +1,10 @@
 import Order from "../models/order.model.js";
 import AppError from "../utils/AppError.js";
+import validateId from "../validators/validateId.js";
 
 const checkOrderOwnership = async (req, res, next) => {
   const { id } = req.params;
-
+  validateId(id);
   const order = await Order.findById(id);
 
   if (!order) {
@@ -11,7 +12,7 @@ const checkOrderOwnership = async (req, res, next) => {
   }
 
   // Admin له صلاحية كاملة
-  if (req.user.role === "ADMIN") {
+  if (req.user.role === "admin") {
     req.order = order;
     return next();
   }
