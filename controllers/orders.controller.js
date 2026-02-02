@@ -1,41 +1,50 @@
-import OrderServer from '../services/orders.service.js';
+import OrderService from '../services/orders.service.js';
 import asyncHandler from '../middleware/asyncHandler.js';
-import Logger from '../utils/logger.js';
+import { BaseController } from '../utils/baseController.js';
 
-const createOrder = asyncHandler(async (req, res) => {
-    const result = await OrderServer.createOrder(req.body);
-    res.status(200).json({ status: "success", data: result, message: "تم إنشاء الطلب بنجاح" });
-});
+class OrdersController extends BaseController {
+  constructor(service = OrderService) {
+      super(service);
+  }
 
-const getAllOrders = asyncHandler(async (req, res) => {
-    const result = await OrderServer.getAllOrders(req.query);
-    res.status(200).json({ status: "success", data: result, message: "تم جلب جميع الطلبات بنجاح" });
-});
+  createOrder = asyncHandler(async (req, res) => {
+    const data = await this.service.createOrder(req.body);
+    this.logAction("إنشاء طلب", `المستخدم: ${req.user.id}`);
+    this.send(res, data, "تم إنشاء الطلب بنجاح", 201);
+  });
 
-const getOrderById = asyncHandler(async (req, res) => {
-    const result = await OrderServer.getOrderById(req.params.id);
-    res.status(200).json({ status: "success", data: result, message: "تم جلب الطلب بنجاح" });
-});
+  getAllOrders = asyncHandler(async (req, res) => {
+    const data = await this.service.getAllOrders(req.query);
+    this.logAction("جلب جميع الطلبات", `الاستعلام: ${JSON.stringify(req.query)}`);
+    this.send(res, data, "تم جلب جميع الطلبات بنجاح", 200);
+  });
 
-const cancelOrder = asyncHandler(async (req, res) => {
-    const result = await OrderServer.cancelOrder(req.params.id);
-    res.status(200).json({ status: "success", data: result, message: "تم إلغاء الطلب بنجاح" });
-});
+  getMyOrders = asyncHandler(async (req, res) => {
+    const data = await this.service.getMyOrders({
+      userId: req.user.id,
+      queryParams: req.query
+    });
+    this.logAction("جلب طلبات المستخدم", req.user.id);
+    this.send(res, data, "تم جلب الطلبات بنجاح", 200);
+  });
 
-const getMyOrders = asyncHandler(async (req, res) => {
-    Logger.info(`جلب طلبات المستخدم - المستخدم: ${req.user.id}, الاستعلام: ${JSON.stringify(req.query)}`);
-    const result = await OrderServer.getMyOrders({ userId: req.user.id, queryParams: req.query });
-    res.status(200).json({ status: "success", data: result, message: `تم جلب طلبات المستخدم بنجاح : ${req.user.id}` });
-})
+  getOrderById = asyncHandler(async (req, res) => {
+    const data = await this.service.getOrderById(req.params.id);
+    this.logAction("جلب الطلب", req.params.id);
+    this.send(res, data, "تم جلب الطلب بنجاح", 200);
+  });
 
-const updateOrderStatus = asyncHandler(async (req, res) => {
-    const result = await OrderServer.updateOrderStatus(req, res);
-    res.status(200).json({ status: "success", data: result, message: "تم تحديث حالة الطلب بنجاح" });
-});
+  updateStatus = asyncHandler(async (req, res) => {
+    const data = await this.service.updateOrderStatus(req);
+    this.logAction("تحديث حالة الطلب", req.params.id);
+    this.send(res, data, "تم تحديث حالة الطلب بنجاح", 200);
+  });
 
-const deleteOrder = asyncHandler(async (req, res) => {
-    const result = await OrderServer.deleteOrder(req.params.id);
-    res.status(200).json({ status: "success", data: result, message: "تم حذف الطلب بنجاح" });
-});
+  cancelOrder = asyncHandler(async (req, res) => {
+    const data = await this.service.cancelOrder(req.params.id);
+    this.logAction("إلغاء الطلب", req.params.id);
+    this.send(res, data, "تم إلغاء الطلب بنجاح", 200);
+  });
+}
 
-export { createOrder, getAllOrders, getOrderById, cancelOrder, getMyOrders, updateOrderStatus, deleteOrder };
+export default new OrdersController();

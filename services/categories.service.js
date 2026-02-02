@@ -5,11 +5,12 @@ import CategoryValidator from "../validators/category.validator.js";
 import validateId from "../validators/validateId.js";
 import generateSlug from '../utils/generateSlug.js';
 
+
 class CategoriesService {
-    static async getAllCategories() {
-        // get all categories from db
-        const categories = await Category.find();
-        if (categories.length === 0) {
+
+    async getAllCategories(query) {
+        const categories = await Category.find(query);
+        if (categories.length === 0 || !categories) {
             Logger.error('لا يوجد تصنيفات');
             throw new AppError('لا يوجد تصنيفات', 404);
         }
@@ -17,51 +18,46 @@ class CategoriesService {
         return categories;
     }
 
-    static async getCategoryById(categoryId) {
-        // get category by id from db
+    async getCategoryById(categoryId) {
         validateId(categoryId);
         const category = await Category.findById(categoryId);
         if (!category) {
             Logger.error('لا يوجد تصنيف');
             throw new AppError('لا يوجد تصنيف', 404);
         }
-        Logger.info('جلب تصنيف');
         return category;
     }
 
-    static async createCategory(categoryData) {
+    async createCategory(categoryData) {
         CategoryValidator.validateCreate(categoryData);
         categoryData.slug = generateSlug(categoryData.name);
-        let newCategory = await Category.create(categoryData);
-        Logger.info('إنشاء تصنيف جديد');
-        return newCategory;
+        return await Category.create(categoryData);
     }
 
-    static async updateCategory(categoryId, categoryData) {
-        // update category in db
+    async updateCategory(categoryId, categoryData) {
         validateId(categoryId);
         CategoryValidator.validateUpdate(categoryData);
-        let categories = await Category.findByIdAndUpdate(categoryId, categoryData, { new: true });
-        if (!categories) {
+        const category = await Category.findByIdAndUpdate(
+            categoryId,
+            categoryData,
+            { new: true }
+        );
+        if (!category) {
             Logger.error('لا يوجد تصنيف');
             throw new AppError('لا يوجد تصنيف', 404);
         }
-        categories = await categories.save();
-        Logger.info('تحديث تصنيف');
-        return categories;
+        return category;
     }
 
-    static async deleteCategory(categoryId) {
-        // delete category from db
+    async deleteCategory(categoryId) {
         validateId(categoryId);
         const category = await Category.findByIdAndDelete(categoryId);
         if (!category) {
             Logger.error('لا يوجد تصنيف');
             throw new AppError('لا يوجد تصنيف', 404);
         }
-        Logger.info('حذف تصنيف');
         return category;
     }
 }
 
-export default CategoriesService;
+export default new CategoriesService();

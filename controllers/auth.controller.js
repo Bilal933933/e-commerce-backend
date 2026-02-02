@@ -1,22 +1,26 @@
 import asyncHandler from '../middleware/asyncHandler.js';
 import AuthService from '../services/auth.service.js';
+import { BaseController } from '../utils/baseController.js';
 
-export const registerUser = asyncHandler(async (req, res) => {
-    const result = await AuthService.register(req.body);
 
-    res.status(201).json({
-        status: 'success',
-        message: 'تم التسجيل بنجاح',
-        data: result,
+
+
+class AuthController extends BaseController {
+    login = asyncHandler(async (req, res) => {
+        const data = await this.service.login(req.body);
+        this.logAction("تسجيل الدخول", `المستخدم: ${req.body.email}`);
+        this.send(res, data, "تم تسجيل الدخول بنجاح", 200);
     });
-});
 
-export const loginUser = asyncHandler(async (req, res) => {
-    const result = await AuthService.login(req.body);
-
-    res.status(200).json({
-        status: 'success',
-        message: 'تم تسجيل الدخول بنجاح',
-        data: result,
+    register = asyncHandler(async (req, res) => {
+        const data = await this.service.register(req.body);
+        this.logAction("تسجيل المستخدم", JSON.stringify(req.body));
+        this.send(res, data, "تم تسجيل المستخدم بنجاح", 201);
     });
-});
+}
+
+// إنشاء Instance
+const authController = new AuthController(AuthService);
+
+// التصدير للاستخدام في الـ Routes
+export default authController;

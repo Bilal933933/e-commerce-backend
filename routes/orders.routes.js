@@ -1,20 +1,10 @@
 import express from "express";
-
-import {
-  createOrder,
-  getMyOrders,
-  getOrderById,
-  getAllOrders,
-  cancelOrder,
-  updateOrderStatus,
-} from "../controllers/orders.controller.js";
-
 import authMiddleware from '../middleware/verifyToken.js';
 import restrictTo from "../middleware/restrictTo.js";
-
 import checkOrderOwnership from "../middleware/checkOrderOwnership.js";
 import restrictOrderStatus from "../middleware/restrictOrderStatus.js";
 import validateOrderStatusTransition from "../middleware/validateOrderStatusTransition.js";
+import ordersController from "../controllers/orders.controller.js";
 
 const router = express.Router();
 
@@ -23,18 +13,25 @@ const router = express.Router();
 ======================= */
 
 // Create order
-router.post("/", authMiddleware, createOrder);
+// router.post("/", authMiddleware, createOrder);
+router.post("/", authMiddleware, ordersController.createOrder);
 
 // Get my orders
-router.get("/my", authMiddleware, getMyOrders);
+router.get("/my", authMiddleware, ordersController.getMyOrders);
 
 // Get single order (User / Admin)
 router.get(
   "/:id",
   authMiddleware,
   checkOrderOwnership,
-  getOrderById
+  ordersController.getOrderById
 );
+// router.get(
+//   "/:id",
+//   authMiddleware,
+//   checkOrderOwnership,
+//   getOrderById
+// );
 
 // Cancel order
 router.patch(
@@ -42,8 +39,15 @@ router.patch(
   authMiddleware,
   checkOrderOwnership,
   restrictOrderStatus,
-  cancelOrder
+  ordersController.cancelOrder
 );
+// router.patch(
+//   "/cancel/:id",
+//   authMiddleware,
+//   checkOrderOwnership,
+//   restrictOrderStatus,
+//   cancelOrder
+// );
 
 /* =======================
    Admin Routes
@@ -54,8 +58,14 @@ router.get(
   "/",
   authMiddleware,
   restrictTo("admin"),
-  getAllOrders
+  ordersController.getAllOrders
 );
+// router.get(
+//   "/",
+//   authMiddleware,
+//   restrictTo("admin"),
+//   getAllOrders
+// );
 
 // Update order status
 router.patch(
@@ -64,7 +74,15 @@ router.patch(
   restrictTo("admin"),
   checkOrderOwnership,
   validateOrderStatusTransition,
-  updateOrderStatus
+  ordersController.updateStatus
 );
+// router.patch(
+//   "/status/:id",
+//   authMiddleware,
+//   restrictTo("admin"),
+//   checkOrderOwnership,
+//   validateOrderStatusTransition,
+//   updateOrderStatus
+// );
 
 export default router;

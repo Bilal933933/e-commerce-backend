@@ -1,10 +1,11 @@
 import express from 'express';
-import { registerUser, loginUser } from '../controllers/auth.controller.js';
+import authController from '../controllers/auth.controller.js';
 
 const router = express.Router();
 
 // مسارات المصادقة
-router.post('/register', registerUser);
-router.post('/login', loginUser);
+
+router.post('/login', authController.login);
+router.post('/register', authController.register);
 
 export default router;

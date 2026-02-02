@@ -1,22 +1,35 @@
 import asyncHandler from "../middleware/asyncHandler.js";
 import UsersService from "../services/users.service.js";
+import { BaseController } from "../utils/baseController.js";
 
-export const getUserProfile = asyncHandler(async (req, res) => {
-    const result = await UsersService.getUserProfile(req.user.id);
-    res.status(200).json({ status: "success", data: result, message: "تم جلب الملف الشخصي بنجاح" });
-});
+class UsersController extends BaseController {
+    constructor(service = UsersService) {
+        super(service);
+    }
 
-export const updateUserProfile = asyncHandler(async (req, res) => {
-    const result = await UsersService.updateUserProfile(req.user.id, req.body);
-    res.status(200).json({ status: "success", data: result, message: "تم تحديث الملف الشخصي بنجاح" });
-});
+    getUserProfile = asyncHandler(async (req, res) => {
+        const data = await this.service.getUserProfile(req.user.id);
+        this.logAction("جلب الملف الشخصي للمستخدم", `المعرف: ${req.user.id}`);
+        this.send(res, data, "تم جلب الملف الشخصي بنجاح", 200);
+    });
 
-export const getAllUsers = asyncHandler(async (req, res) => {
-    const result = await UsersService.getAllUsers();
-    res.status(200).json({ status: "success", data: result, message: "تم جلب جميع المستخدمين بنجاح" });
-});
+    updateUserProfile = asyncHandler(async (req, res) => {
+        const data = await this.service.updateUserProfile(req.user.id, req.body);
+        this.logAction("تحديث الملف الشخصي للمستخدم", `المعرف: ${req.user.id}`);
+        this.send(res, data, "تم تحديث الملف الشخصي بنجاح", 200);
+    });
 
-export const deleteUser = asyncHandler(async (req, res) => {
-    const result = await UsersService.deleteUser(req.params.id);
-    res.status(200).json({ status: "success", data: result, message: "تم حذف المستخدم بنجاح" });
-})
+    getAllUsers = asyncHandler(async (req, res) => {
+        const data = await this.service.getAllUsers();
+        this.logAction("جلب جميع المستخدمين", `المعرف: ${req.user.id}`);
+        this.send(res, data, "تم جلب جميع المستخدمين بنجاح", 200);
+    });
+
+    deleteUser = asyncHandler(async (req, res) => {
+        const data = await this.service.deleteUser(req.params.id);
+        this.logAction("حذف المستخدم", `المعرف: ${req.params.id}`);
+        this.send(res, data, "تم حذف المستخدم بنجاح", 200);
+    });
+}
+
+export default new UsersController();

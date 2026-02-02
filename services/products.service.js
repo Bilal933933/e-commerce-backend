@@ -1,199 +1,3 @@
-// import ProductsValidator from "../validators/products.validator.js";
-// import validateId from "../validators/validateId.js";
-// import Product from "../models/product.model.js";
-// import generateSlug from "../utils/generateSlug.js";
-// import Logger from "../utils/logger.js";
-// import AppError from "../utils/AppError.js";
-// import APIFeatures from "../utils/apiFeatures.js";
-
-// class ProductsService {
-
-//   // ======================
-//   // Create Product
-//   // ======================
-//   static async createProduct(data) {
-//     ProductsValidator.validateCreateProduct(data);
-
-//     data.slug = generateSlug(data.name);
-
-//     const existingProduct = await Product.findOne({ slug: data.slug });
-//     if (existingProduct) {
-//       Logger.warn("محاولة إنشاء منتج مكرر");
-//       throw new AppError("المنتج موجود بالفعل", 400);
-//     }
-
-//     if (data.categoryId !== null && data.categoryId !== undefined) {
-//       validateId(data.categoryId);
-//     }
-
-//     const newProduct = await Product.create(data);
-
-//     Logger.info(`تم إنشاء منتج جديد: ${newProduct._id}`);
-
-//     return await Product.findById(newProduct._id)
-//       .populate({
-//         path: "categoryId",
-//         select: "name slug description image type"
-//       })
-//       .lean();
-//   }
-
-//   // ======================
-//   // Get All Products (with API Features)
-//   // ======================
-//   static async getAllProducts(queryParams) {
-//     const page = Math.max(1, Number(queryParams.page) || 1);
-// const limit = Number(queryParams.limit) || 10;
-// const skip = (page - 1) * limit;
-
-// const totalDocs = await Product.countDocuments({ isDeleted: false });
-
-//     const baseQuery = Product.find({isDeleted: false})
-//       .populate({
-//         path: "categoryId",
-//         select: "name slug"
-//       });
-
-//     const features = new APIFeatures(baseQuery, queryParams)
-//       .filter()
-//       .search("name")
-//       .sort()
-//       .paginate();
-
-//     const products = await features.query.lean();
-
-//     if (!products.length) {
-//       Logger.warn("لا توجد منتجات في النظام");
-//       throw new AppError("لا توجد منتجات", 404);
-//     }
-
-//     Logger.info(`تم جلب ${products.length} منتج`);
-//     return {products, page :page, limit: limit ,skip: skip, totalDocs: totalDocs}; // Return the pagination data along with the products;
-//   }
-
-//   // ======================
-//   // Get Products By Category
-//   // ======================
-//   static async getProductsByCategory(categoryId, queryParams) {
-//     validateId(categoryId);
-
-//     const baseQuery = Product.find({
-//       categoryId,
-//       isDeleted: false
-//     }).populate({
-//       path: "categoryId",
-//       select: "name slug"
-//     });
-
-//     const features = new APIFeatures(baseQuery, queryParams)
-//       .filter()
-//       .search("name")
-//       .sort()
-//       .paginate();
-
-//     const products = await features.query.lean();
-
-//     if (!products.length) {
-//       Logger.warn("لا توجد منتجات في هذا التصنيف");
-//       throw new AppError("لا توجد منتجات في هذا التصنيف", 404);
-//     }
-
-//     Logger.info(`تم جلب ${products.length} منتج`);
-//     return products;
-//   }
-
-//   // ======================
-//   // Get Single Product
-//   // ======================
-//   static async getProduct(id) {
-//     validateId(id);
-
-//     const product = await Product.findOne({
-//       _id: id,
-//       isDeleted: false
-//     })
-//       .populate({
-//         path: "categoryId",
-//         select: "name slug description image type"
-//       })
-//       .lean();
-
-//     if (!product) {
-//       Logger.warn("المنتج غير موجود");
-//       throw new AppError("المنتج غير موجود", 404);
-//     }
-
-//     Logger.info(`تم جلب المنتج بالمعرف: ${id}`);
-//     return product;
-//   }
-
-//   // ======================
-//   // Update Product
-//   // ======================
-//   static async updateProduct(data, id) {
-//     ProductsValidator.validateUpdateProduct(data);
-//     validateId(id);
-
-//     if (data.name) {
-//       data.slug = generateSlug(data.name);
-
-//       const existingProduct = await Product.findOne({
-//         slug: data.slug,
-//         _id: { $ne: id }
-//       });
-
-//       if (existingProduct) {
-//         Logger.warn("تعارض slug مع منتج آخر");
-//         throw new AppError("اسم المنتج مستخدم بالفعل", 400);
-//       }
-//     }
-
-//     const updatedProduct = await Product.findOneAndUpdate(
-//       { _id: id, isDeleted: false },
-//       data,
-//       { new: true, runValidators: true }
-//     )
-//       .populate({
-//         path: "categoryId",
-//         select: "name slug description image type"
-//       })
-//       .lean();
-
-//     if (!updatedProduct) {
-//       Logger.warn("المنتج غير موجود");
-//       throw new AppError("المنتج غير موجود", 404);
-//     }
-
-//     Logger.info(`تم تحديث المنتج بالمعرف: ${id}`);
-//     return updatedProduct;
-//   }
-
-//   // ======================
-//   // Soft Delete Product
-//   // ======================
-//   static async deleteProduct(id) {
-//     validateId(id);
-
-//     const product = await Product.findOneAndUpdate(
-//       { _id: id, isDeleted: false },
-//       { isDeleted: true, deletedAt: new Date() },
-//       { new: true }
-//     );
-
-//     if (!product) {
-//       Logger.warn("المنتج غير موجود");
-//       throw new AppError("المنتج غير موجود", 404);
-//     }
-
-//     Logger.info(`تم حذف المنتج (Soft Delete): ${id}`);
-//     return product;
-//   }
-// }
-
-// export default ProductsService;
-
-
-
 import ProductsValidator from "../validators/products.validator.js";
 import validateId from "../validators/validateId.js";
 import Product from "../models/product.model.js";
@@ -204,189 +8,186 @@ import APIFeatures from "../utils/apiFeatures.js";
 
 class ProductsService {
 
-  // ======================
-  // Create Product
-  // ======================
-  static async createProduct(data) {
-    ProductsValidator.validateCreateProduct(data);
-    data.slug = generateSlug(data.name);
+    // ======================
+    // Create Product
+    // ======================
+    async createProduct(data) {
+        ProductsValidator.validateCreateProduct(data);
 
-    const existingProduct = await Product.findOne({ slug: data.slug });
-    if (existingProduct) {
-      Logger.warn("محاولة إنشاء منتج مكرر");
-      throw new AppError("المنتج موجود بالفعل", 400);
+        data.slug = generateSlug(data.name);
+
+        const existingProduct = await Product.findOne({ slug: data.slug });
+        if (existingProduct) {
+            Logger.warn("محاولة إنشاء منتج مكرر");
+            throw new AppError("المنتج موجود بالفعل", 400);
+        }
+
+        if (data.categoryId) {
+            validateId(data.categoryId);
+        }
+
+        const newProduct = await Product.create(data);
+
+        Logger.info(`تم إنشاء منتج جديد: ${newProduct._id}`);
+
+        return await Product.findById(newProduct._id)
+            .populate({
+                path: "categoryId",
+                select: "name slug description image type",
+            })
+            .lean();
     }
 
-    if (data.categoryId !== null && data.categoryId !== undefined) {
-      validateId(data.categoryId);
+    // ======================
+    // Get All Products
+    // ======================
+    async getAllProducts(queryParams) {
+        const baseQuery = Product.find({ isDeleted: false })
+            .populate({
+                path: "categoryId",
+                select: "name slug",
+            });
+
+        const features = new APIFeatures(baseQuery, queryParams)
+            .filter()
+            .search("name")
+            .sort()
+            .paginate();
+
+        const products = await features.query.lean();
+
+        if (!products.length) {
+            Logger.warn("لا توجد منتجات");
+            throw new AppError("لا توجد منتجات", 404);
+        }
+
+        Logger.info(`تم جلب ${products.length} منتج`);
+
+        const page = Number(queryParams.page) || 1;
+        const limit = Number(queryParams.limit) || 10;
+        const startIndex = (page - 1) * limit;
+        const endIndex = page * limit;
+        const total = await Product.countDocuments({ isDeleted: false });
+        return { products, page, limit, total, startIndex, endIndex };
     }
 
-    const newProduct = await Product.create(data);
-    Logger.info(`تم إنشاء منتج جديد: ${newProduct._id}`);
+    // ======================
+    // Get Products By Category
+    // ======================
+    async getProductsByCategory(categoryId, queryParams) {
+        validateId(categoryId);
 
-    return await Product.findById(newProduct._id)
-      .populate({
-        path: "categoryId",
-        select: "name slug description image type"
-      })
-      .lean();
-  }
+        const baseQuery = Product.find({
+            categoryId,
+            isDeleted: false,
+        }).populate({
+            path: "categoryId",
+            select: "name slug",
+        });
 
-  // ======================
-  // Get All Products (with API Features)
-  // ======================
-  static async getAllProducts(queryParams) {
-    let page = Math.max(1, Number(queryParams.page) || 1);
-    const limit = Number(queryParams.limit) || 10;
-    const skip = (page - 1) * limit;
+        const features = new APIFeatures(baseQuery, queryParams)
+            .filter()
+            .search("name")
+            .sort()
+            .paginate();
 
-    const totalDocs = await Product.countDocuments({ isDeleted: false });
+        const products = await features.query.lean();
 
-    const baseQuery = Product.find({ isDeleted: false })
-      .populate({
-        path: "categoryId",
-        select: "name slug"
-      });
-
-    const features = new APIFeatures(baseQuery, queryParams)
-      .filter()
-      .search("name")
-      .sort()
-      .paginate();
-
-    const products = await features.query.lean();
-
-    if (!products.length) {
-      Logger.warn("لا توجد منتجات في النظام");
-      throw new AppError("لا توجد منتجات", 404);
+        if (!products.length) {
+            Logger.warn("لا توجد منتجات في هذا التصنيف");
+            throw new AppError("لا توجد منتجات في هذا التصنيف", 404);
+        }
+        Logger.info(`تم جلب ${products.length} منتج من التصنيف ${categoryId}`);
+        return products;
     }
 
-    Logger.info(`تم جلب ${products.length} منتج`);
-    return {
-      products,
-      page,
-      limit,
-      skip,
-      totalDocs
-    };
-  }
+    // ======================
+    // Get Single Product
+    // ======================
+    async getProduct(id) {
+        validateId(id);
 
-  // ======================
-  // Get Products By Category
-  // ======================
-  static async getProductsByCategory(categoryId, queryParams) {
-    validateId(categoryId);
+        const product = await Product.findOne({
+            _id: id,
+            isDeleted: false,
+        })
+            .populate({
+                path: "categoryId",
+                select: "name slug description image type",
+            })
+            .lean();
 
-    const baseQuery = Product.find({
-      categoryId,
-      isDeleted: false
-    }).populate({
-      path: "categoryId",
-      select: "name slug"
-    });
+        if (!product) {
+            Logger.warn("المنتج غير موجود");
+            throw new AppError("المنتج غير موجود", 404);
+        }
 
-    const features = new APIFeatures(baseQuery, queryParams)
-      .filter()
-      .search("name")
-      .sort()
-      .paginate();
-
-    const products = await features.query.lean();
-
-    if (!products.length) {
-      Logger.warn("لا توجد منتجات في هذا التصنيف");
-      throw new AppError("لا توجد منتجات في هذا التصنيف", 404);
+        return product;
     }
 
-    Logger.info(`تم جلب ${products.length} منتج`);
-    return products;
-  }
+    // ======================
+    // Update Product
+    // ======================
+    async updateProduct(data, id) {
+        ProductsValidator.validateUpdateProduct(data);
+        validateId(id);
 
-  // ======================
-  // Get Single Product
-  // ======================
-  static async getProduct(id) {
-    validateId(id);
+        if (data.name) {
+            data.slug = generateSlug(data.name);
 
-    const product = await Product.findOne({
-      _id: id,
-      isDeleted: false
-    })
-      .populate({
-        path: "categoryId",
-        select: "name slug description image type"
-      })
-      .lean();
+            const existingProduct = await Product.findOne({
+                slug: data.slug,
+                _id: { $ne: id },
+            });
 
-    if (!product) {
-      Logger.warn("المنتج غير موجود");
-      throw new AppError("المنتج غير موجود", 404);
+            if (existingProduct) {
+                Logger.warn("تعارض slug مع منتج آخر");
+                throw new AppError("اسم المنتج مستخدم بالفعل", 400);
+            }
+        }
+
+        const updatedProduct = await Product.findOneAndUpdate(
+            { _id: id, isDeleted: false },
+            data,
+            { new: true, runValidators: true }
+        )
+            .populate({
+                path: "categoryId",
+                select: "name slug description image type",
+            })
+            .lean();
+
+        if (!updatedProduct) {
+            Logger.warn("المنتج غير موجود");
+            throw new AppError("المنتج غير موجود", 404);
+        }
+
+        Logger.info(`تم تحديث المنتج: ${id}`);
+
+        return updatedProduct;
     }
 
-    Logger.info(`تم جلب المنتج بالمعرف: ${id}`);
-    return product;
-  }
+    // ======================
+    // Soft Delete Product
+    // ======================
+    async deleteProduct(id) {
+        validateId(id);
 
-  // ======================
-  // Update Product
-  // ======================
-  static async updateProduct(data, id) {
-    ProductsValidator.validateUpdateProduct(data);
-    validateId(id);
+        const product = await Product.findOneAndUpdate(
+            { _id: id, isDeleted: false },
+            { isDeleted: true, deletedAt: new Date() },
+            { new: true }
+        );
 
-    if (data.name) {
-      data.slug = generateSlug(data.name);
-      const existingProduct = await Product.findOne({
-        slug: data.slug,
-        _id: { $ne: id }
-      });
+        if (!product) {
+            Logger.warn("المنتج غير موجود");
+            throw new AppError("المنتج غير موجود", 404);
+        }
 
-      if (existingProduct) {
-        Logger.warn("تعارض slug مع منتج آخر");
-        throw new AppError("اسم المنتج مستخدم بالفعل", 400);
-      }
+        Logger.info(`تم حذف المنتج (Soft Delete): ${id}`);
+
+        return product;
     }
-
-    const updatedProduct = await Product.findOneAndUpdate(
-      { _id: id, isDeleted: false },
-      data,
-      { new: true, runValidators: true }
-    )
-      .populate({
-        path: "categoryId",
-        select: "name slug description image type"
-      })
-      .lean();
-
-    if (!updatedProduct) {
-      Logger.warn("المنتج غير موجود");
-      throw new AppError("المنتج غير موجود", 404);
-    }
-
-    Logger.info(`تم تحديث المنتج بالمعرف: ${id}`);
-    return updatedProduct;
-  }
-
-  // ======================
-  // Soft Delete Product
-  // ======================
-  static async deleteProduct(id) {
-    validateId(id);
-
-    const product = await Product.findOneAndUpdate(
-      { _id: id, isDeleted: false },
-      { isDeleted: true, deletedAt: new Date() },
-      { new: true }
-    );
-
-    if (!product) {
-      Logger.warn("المنتج غير موجود");
-      throw new AppError("المنتج غير موجود", 404);
-    }
-
-    Logger.info(`تم حذف المنتج (Soft Delete): ${id}`);
-    return product;
-  }
 }
 
-export default ProductsService;
+export default new ProductsService();

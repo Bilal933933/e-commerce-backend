@@ -1,9 +1,15 @@
 import ProductsService from "../services/products.service.js";
 import asyncHandler from "../middleware/asyncHandler.js";
+import { BaseController } from "../utils/baseController.js";
 
 
-const createProduct = asyncHandler(async (req, res) => {
-    const { name, price, description, categoryId, image } = req.body;
+class ProductsController extends BaseController {
+  constructor(service = ProductsService) {
+    super(service);
+  }
+    
+  createProduct = asyncHandler(async (req, res) => {
+       const { name, price, description, categoryId, image } = req.body;
     const product = await ProductsService.createProduct({
         name,
         price,
@@ -11,36 +17,40 @@ const createProduct = asyncHandler(async (req, res) => {
         categoryId,
         image,
     });
-    res.status(201).json({ status: "success", data: product, message: "تم تسجيل المنتج بنجاح" });
-});
+    this.logAction("إنشاء منتج", `المستخدم: ${req.user.id}`);
+    this.send(res, product, "تم تسجيل المنتج بنجاح", 201);
+  });
 
-const updateProduct = asyncHandler(async (req, res) => {
-    const { id } = req.params;
-    const { name, price, description, categoryId, image } = req.body;
-    const product = await ProductsService.updateProduct( {
-        name,
-        price,
-        description,
-        categoryId,
-    }, id);
-    res.status(200).json({ status: "success", data: product, message: "تم تحديث المنتج بنجاح" });
-})
+  getAllProducts = asyncHandler(async (req, res) => {
+    const data = await this.service.getAllProducts(req.query);
+    this.logAction("جلب جميع المنتجات", `الاستعلام: ${JSON.stringify(req.query)}`);
+    this.send(res, data, "تم جلب جميع المنتجات بنجاح", 200);
+  });
 
-const getAllProducts = asyncHandler(async (req, res) => {
-    const products = await ProductsService.getAllProducts(req.query);
-    res.status(200).json({ status: "success", data: products, message: "تم جلب جميع المنتجات بنجاح" });
-});
+  getProduct = asyncHandler(async (req, res) => {
+    const data = await this.service.getProduct(req.params.id);
+    this.logAction("جلب المنتج", req.params.id);
+    this.send(res, data, "تم جلب المنتج بنجاح", 200);
+  });
 
-const getProduct = asyncHandler(async (req, res) => {
-    const { id } = req.params;
-    const product = await ProductsService.getProduct(id);
-    res.status(200).json({ status: "success", data: product, message: "تم جلب المنتج بنجاح" });
-})
+  getProductsByCategory = asyncHandler(async (req, res) => {
+    const data = await this.service.getProductsByCategory(req.params.id, req.query);
+    this.logAction("جلب المنتجات حسب الفئة", `الاستعلام: ${JSON.stringify(req.query)}`);
+    this.send(res, data, "تم جلب المنتجات بنجاح", 200);
+  });
 
-const deleteProduct = asyncHandler(async (req, res) => {
-    const { id } = req.params;
-    await ProductsService.deleteProduct(id);
-    res.status(200).json({ status: "success", message: "تم حذف المنتج بنجاح" });
-});
+  updateProduct = asyncHandler(async (req, res) => {
+    const data = await this.service.updateProduct(req.body, req.params.id);
+    this.logAction("تحديث المنتج", `المعرف: ${req.params.id}`);
+    this.send(res, data, "تم تحديث المنتج بنجاح", 200);
+  });
 
-export { createProduct, getAllProducts, deleteProduct, updateProduct, getProduct };
+  deleteProduct = asyncHandler(async (req, res) => {
+    const data = await this.service.deleteProduct(req.params.id);
+    this.logAction("حذف المنتج", `المعرف: ${req.params.id}`);
+    this.send(res, data, "تم حذف المنتج بنجاح", 200);
+  });
+
+}
+
+export default new ProductsController();

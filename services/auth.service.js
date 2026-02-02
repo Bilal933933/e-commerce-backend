@@ -6,26 +6,24 @@ import Logger from '../utils/logger.js';
 import Validation from '../validators/auth.validator.js';
 
 class AuthService {
-    static async register({ name, email, password }) {
-        // Validation
-        Validation.validateRegister({ name, email, password });
+    async register(userData) {
+        Validation.validateRegister(userData);
 
-        // Business rule: unique email
-        const existingUser = await User.findOne({ email });
+        const existingUser = await User.findOne({ email: userData.email });
         if (existingUser) {
+            Logger.error('البريد الإلكتروني مستخدم بالفعل');
             throw new AppError('البريد الإلكتروني مستخدم بالفعل', 409);
         }
 
-        // Hash password
-        const hashedPassword = await bcrypt.hash(password, 12);
+        const hashedPassword = await bcrypt.hash(userData.password, 12);
 
         const user = await User.create({
-            name,
-            email,
+            name: userData.name,
+            email: userData.email,
             password: hashedPassword,
         });
 
-        Logger.info(`مستخدم جديد: ${email}`);
+        Logger.info(`مستخدم جديد: ${userData.email}`);
 
         const token = jwt.sign(
             { id: user._id },
@@ -43,20 +41,21 @@ class AuthService {
         };
     }
 
-    static async login({ email, password }) {
-        // Validation
-        Validation.validateLogin({ email, password });
+    async login(userData) {
+        Validation.validateLogin(userData);
 
-        const user = await User.findOne({ email }).select('+password');
+        const user = await User.findOne({ email: userData.email }).select('+password');
         if (!user) {
+            Logger.error('البريد الإلكتروني غير صحيح');
             throw new AppError('البريد الإلكتروني غير صحيح', 401);
-        }    
+        }
 
-        const correctPassword = await bcrypt.compare(password, user.password);
+        const correctPassword = await bcrypt.compare(userData.password, user.password);
         if (!correctPassword) {
+            Logger.error('كلمة المرور غير صحيحة');
             throw new AppError('كلمة المرور غير صحيحة', 401);
         }
-        Logger.info(`تسجيل دخول ناجح: ${email}`);
+        Logger.info(`تسجيل دخول ناجح: ${userData.email}`);
 
         const token = jwt.sign(
             { id: user._id },
@@ -72,7 +71,6 @@ class AuthService {
             token,
         };
     }
-
 }
 
-export default AuthService;
+export default new AuthService();
