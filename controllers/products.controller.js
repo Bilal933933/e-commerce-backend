@@ -10,7 +10,7 @@ class ProductsController extends BaseController {
     
   createProduct = asyncHandler(async (req, res) => {
        const { name, price, description, categoryId, image } = req.body;
-    const product = await ProductsService.createProduct({
+    const product = await this.service.createProduct({
         name,
         price,
         description,

@@ -5,6 +5,7 @@ import AppError from "../utils/AppError.js";
 import validateId from "../validators/validateId.js";
 import Logger from "../utils/logger.js";
 import APIFeatures from "../utils/apiFeatures.js";
+import paginate from "../utils/pagination.js";
 
 class OrderService {
 
@@ -126,18 +127,11 @@ class OrderService {
 
     const orders = await features.query;
 
-    if (!orders.length) {
-      Logger.warn("لا توجد طلبات لهذا المستخدم");
-      throw new AppError("لا توجد طلبات لهذا المستخدم", 404);
-    }
-
     Logger.info(`تم جلب ${orders.length} طلبات`);
 
-    const page = Number(queryParams.page) || 1;
-    const limit = Number(queryParams.limit) || 10;
-    const skip = (page - 1) * limit;
+    const totalItems = await Order.countDocuments({ user: userId });
 
-    return { page, limit, skip, orders };
+    return paginate(orders, totalItems, queryParams);
   }
 
   // ======================
@@ -155,12 +149,11 @@ class OrderService {
       .limitFields()
       .paginate();
 
-    const page = Number(queryParams.page) || 1;
-    const limit = Number(queryParams.limit) || 10;
-    const skip = (page - 1) * limit;
     const orders = await features.query;
 
-    return { page, limit, skip, orders }; // Return the paginated orders;
+    Logger.info(`تم جلب ${orders.length} طلبات`);
+    const totalItems = await Order.countDocuments();
+    return paginate(orders, totalItems, queryParams); // Return the paginated orders;
   }
 
   // ======================

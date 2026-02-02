@@ -5,6 +5,7 @@ import generateSlug from "../utils/generateSlug.js";
 import Logger from "../utils/logger.js";
 import AppError from "../utils/AppError.js";
 import APIFeatures from "../utils/apiFeatures.js";
+import paginate from "../utils/pagination.js";
 
 class ProductsService {
 
@@ -56,19 +57,17 @@ class ProductsService {
 
         const products = await features.query.lean();
 
+        // إزالة 404 عند قائمة فارغة → نرجع Array فاضي
         if (!products.length) {
             Logger.warn("لا توجد منتجات");
-            throw new AppError("لا توجد منتجات", 404);
+        } else {
+            Logger.info(`تم جلب ${products.length} منتج`);
         }
 
-        Logger.info(`تم جلب ${products.length} منتج`);
+        const totalItems = await Product.countDocuments({ isDeleted: false });
 
-        const page = Number(queryParams.page) || 1;
-        const limit = Number(queryParams.limit) || 10;
-        const startIndex = (page - 1) * limit;
-        const endIndex = page * limit;
-        const total = await Product.countDocuments({ isDeleted: false });
-        return { products, page, limit, total, startIndex, endIndex };
+        // ✅ هنا نرجع Response موحد باستخدام paginate
+        return paginate(products, totalItems, queryParams);
     }
 
     // ======================
@@ -98,7 +97,13 @@ class ProductsService {
             throw new AppError("لا توجد منتجات في هذا التصنيف", 404);
         }
         Logger.info(`تم جلب ${products.length} منتج من التصنيف ${categoryId}`);
-        return products;
+
+        const totalItems = await Product.countDocuments({
+            categoryId,
+            isDeleted: false,
+        });
+        
+        return paginate(products, totalItems, queryParams);
     }
 
     // ======================
