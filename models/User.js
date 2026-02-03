@@ -19,6 +19,48 @@ const userSchema = new mongoose.Schema({
     required: true,
     default: "user",
   },
+  cart: [
+    {
+      productId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Product",
+        required: true,
+      },
+      quantity: {
+        type: Number,
+        required: true,
+        min: 1,
+      },
+    },
+  ],
+  orders: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Order",
+    },
+  ],
+  wishlist: [
+    {
+      productId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Product",
+        required: true,
+      },
+    },
+  ],
+  viewed: [
+    {
+      productId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Product",
+        required: true,
+      },
+    },
+  ],
+  isDeleted: {
+    type: Boolean,
+    default: false,
+  },
 },
 {
   timestamps: true,
