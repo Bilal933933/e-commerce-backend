@@ -10,7 +10,9 @@ class Logger {
 
     format(level, message) {
         const timestamp = new Date().toISOString();
-        return `[${timestamp}] ${level}: ${message}`;
+        // تقطيع الرسالة إذا تجاوزت 200 حرف
+        const truncatedMessage = message.length > 200 ? message.substring(0, 200) + '...' : message;
+        return `[${timestamp}] ${level}: ${truncatedMessage}`;
     }
 
     write(level, message) {

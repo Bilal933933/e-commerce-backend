@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken';
 import AppError from '../utils/AppError.js';
 import Logger from '../utils/logger.js';
 import Validation from '../validators/auth.validator.js';
+import UserActivityService from './userActivity.service.js';
 
 class AuthService {
     async register(userData) {
@@ -30,6 +31,13 @@ class AuthService {
             process.env.JWT_SECRET,
             { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
         );
+
+        await UserActivityService.logActivity({
+            userId: user._id,
+            action: 'تسجيل حساب جديد',
+            ip: userData.ip,
+            userAgent: userData.userAgent,
+        });
 
         return {
             user: {
@@ -62,6 +70,14 @@ class AuthService {
             process.env.JWT_SECRET,
             { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
         );
+
+        await UserActivityService.logActivity({
+            userId: user._id,
+            action: 'تسجيل دخول',
+            ip: userData.ip,
+            userAgent: userData.userAgent,
+        });
+        
         return {
             user: {
                 id: user._id,

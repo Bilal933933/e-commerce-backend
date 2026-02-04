@@ -6,6 +6,8 @@ import Logger from "../utils/logger.js";
 import AppError from "../utils/AppError.js";
 import APIFeatures from "../utils/apiFeatures.js";
 import paginate from "../utils/pagination.js";
+import CacheService from "../cache/cache.service.js";
+import cacheKeys from "../cache/cache.keys.js";
 
 class ProductsService {
 
@@ -29,6 +31,8 @@ class ProductsService {
 
         const newProduct = await Product.create(data);
 
+        await CacheService.del("products:list:*");
+
         Logger.info(`تم إنشاء منتج جديد: ${newProduct._id}`);
 
         return await Product.findById(newProduct._id)
@@ -43,6 +47,13 @@ class ProductsService {
     // Get All Products
     // ======================
     async getAllProducts(queryParams) {
+
+        const cacheKey = cacheKeys.products.list(queryParams);
+
+        const cachedProducts = await CacheService.get(cacheKey);
+        if (cachedProducts) {
+            return cachedProducts;
+        }
         const baseQuery = Product.find({ isDeleted: false })
             .populate({
                 path: "categoryId",
@@ -67,14 +78,26 @@ class ProductsService {
         const totalItems = await Product.countDocuments({ isDeleted: false });
 
         // ✅ هنا نرجع Response موحد باستخدام paginate
-        return paginate(products, totalItems, queryParams);
+        const response = paginate(products, totalItems, queryParams);
+
+        await CacheService.set(cacheKey, response);
+
+        return response;
     }
 
     // ======================
     // Get Products By Category
     // ======================
     async getProductsByCategory(categoryId, queryParams) {
+
         validateId(categoryId);
+
+        const cacheKey = cacheKeys.products.byCategory(categoryId, queryParams);
+
+        const cachedProducts = await CacheService.get(cacheKey);
+        if (cachedProducts) {
+            return cachedProducts;
+        }
 
         const baseQuery = Product.find({
             categoryId,
@@ -103,14 +126,23 @@ class ProductsService {
             isDeleted: false,
         });
         
-        return paginate(products, totalItems, queryParams);
+        const response = paginate(products, totalItems, queryParams);
+        await CacheService.set(cacheKey, response);
+        return response;
     }
 
     // ======================
     // Get Single Product
     // ======================
     async getProduct(id) {
-        validateId(id);
+
+        validateId(id)
+        const cacheKey = cacheKeys.products.item(id);
+
+        const cachedProduct = await CacheService.get(cacheKey);
+        if (cachedProduct) {
+            return cachedProduct;
+        }
 
         const product = await Product.findOne({
             _id: id,
@@ -126,6 +158,10 @@ class ProductsService {
             Logger.warn("المنتج غير موجود");
             throw new AppError("المنتج غير موجود", 404);
         }
+
+        await CacheService.set(cacheKey, product);
+
+        Logger.info(`تم جلب المنتج: ${id}`);
 
         return product;
     }
@@ -169,6 +205,10 @@ class ProductsService {
 
         Logger.info(`تم تحديث المنتج: ${id}`);
 
+            // ✅ Cache Invalidation بعد التحديث
+        await CacheService.del("products:list:*");
+        await CacheService.del(`products:item:${id}`);
+
         return updatedProduct;
     }
 
@@ -190,6 +230,10 @@ class ProductsService {
         }
 
         Logger.info(`تم حذف المنتج (Soft Delete): ${id}`);
+
+        // ✅ Cache Invalidation بعد الحذف
+        await CacheService.del("products:list:*");
+        await CacheService.del(`products:item:${id}`);
 
         return product;
     }

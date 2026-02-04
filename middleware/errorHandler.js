@@ -5,29 +5,25 @@ const globalErrorHandler = (err, req, res, next) => {
     err.statusCode = err.statusCode || 500;
     err.status = err.status || 'error';
 
-    // تسجيل الخطأ مع تفاصيل إضافية
-    Logger.error(`${err.message} - ${req.method} ${req.path}`);
+    // تسجيل الخطأ مع تفاصيل إضافية (للـ logs فقط)
+    const errorLog = `[${err.statusCode}] ${err.message} - ${req.method} ${req.path}`;
+    Logger.error(errorLog);
     
-    // في بيئة التطوير: سجّل الـ stack trace
+    // في بيئة التطوير: سجّل الـ stack trace في السجلات فقط
     if (process.env.NODE_ENV === 'development') {
-        console.error('Stack trace:', err.stack);
+        // console.error('🔴 Stack Trace:', err.stack);
+        console.error(errorLog);
     }
 
-    // بناء الاستجابة
+    // بناء الاستجابة - رسالة مختصرة فقط
     const errorResponse = {
         status: err.status,
         message: err.message,
     };
 
-    // في بيئة التطوير: أضف معلومات إضافية
-    if (process.env.NODE_ENV === 'development') {
-        errorResponse.error = err;
-        errorResponse.stack = err.stack;
-    }
-
     // في الإنتاج: لا تُظهر تفاصيل الأخطاء التقنية للمستخدم
     if (process.env.NODE_ENV === 'production' && !err.isOperational) {
-        errorResponse.message = 'حدث خطأ ما، يرجى المحاولة لاحقاً';
+        errorResponse.message = 'حدث خطأ في الخادم، يرجى المحاولة لاحقاً';
     }
 
     res.status(err.statusCode).json(errorResponse);

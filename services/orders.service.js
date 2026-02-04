@@ -114,6 +114,11 @@ class OrderService {
   async getMyOrders({ userId, queryParams = {} }) {
     validateId(userId);
 
+    const user = await User.findById(userId);
+    if (!user) {
+      throw new AppError("المستخدم غير موجود", 404);
+    }
+
     const features = new APIFeatures(
       Order.find({ user: userId })
         .populate("items.product", "name price")
@@ -131,13 +136,15 @@ class OrderService {
 
     const totalItems = await Order.countDocuments({ user: userId });
 
-    return paginate(orders, totalItems, queryParams);
+    const response = paginate(orders, totalItems, queryParams);
+    return response;
   }
 
   // ======================
   // Get All Orders
   // ======================
   async getAllOrders(queryParams = {}) {
+
     const features = new APIFeatures(
       Order.find()
         .populate("user", "name email")
@@ -153,7 +160,8 @@ class OrderService {
 
     Logger.info(`تم جلب ${orders.length} طلبات`);
     const totalItems = await Order.countDocuments();
-    return paginate(orders, totalItems, queryParams); // Return the paginated orders;
+    const response = paginate(orders, totalItems, queryParams);
+    return response;
   }
 
   // ======================

@@ -1,4 +1,3 @@
-import Stack from "../DSA/Stack.js";
 
 class UserDTO {
   constructor(userDoc) {
@@ -8,7 +7,7 @@ class UserDTO {
     this.role = userDoc.role;
     this.cart = userDoc.cart || [];
     this.orders = userDoc.orders || [];
-    this.wishlist = userDoc.wishlist || new Stack();
+    this.wishlist = userDoc.wishlist || [];
     this.viewed = userDoc.viewed || [];
     this.isDeleted = userDoc.isDeleted;
     this.createdAt = userDoc.createdAt;

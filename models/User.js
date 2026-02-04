@@ -9,6 +9,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
     unique: true,
+    index: true,
   },
   password: {
     type: String,
@@ -16,6 +17,7 @@ const userSchema = new mongoose.Schema({
   },
   role: {
     type: String,
+    enum: ["superAdmin", "admin", "user"],
     required: true,
     default: "user",
   },
@@ -66,9 +68,6 @@ const userSchema = new mongoose.Schema({
   timestamps: true,
 }
 );
-
-// index to optimize search by email
-userSchema.index({ email: 1 });
 
 const User = mongoose.model("User", userSchema);
 
